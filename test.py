@@ -20,7 +20,7 @@ def stream_video():
             break
         #if keys[key.SPACE]:
         if perf_counter()-t1 > 5:
-            cv2.imwrite(f'img{idx}.jpg', frame)
+            cv2.imwrite(f'patterns/img{idx}.jpg', frame)
             idx += 1
             t1 = perf_counter()
     cv2.destroyAllWindows()
