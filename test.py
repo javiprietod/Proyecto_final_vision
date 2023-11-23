@@ -15,7 +15,7 @@ def stream_video():
     t1 = perf_counter()
     while True:
         frame = picam.capture_array()
-        cv2.imshow("picam", frame)
+        cv2.imshow("picam", frame) # ESTO A LO MEJOR HAY QUE HACERLO AL FINAL PARA EL TRACKER
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
         #if keys[key.SPACE]:
