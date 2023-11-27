@@ -5,7 +5,7 @@ from time import perf_counter
 
 def stream_video():
     picam = Picamera2()
-    picam.preview_configuration.main.size=(640, 360)
+    picam.preview_configuration.main.size=(320, 180)
     picam.preview_configuration.main.format="RGB888"
     picam.preview_configuration.align()
     picam.configure("preview")
