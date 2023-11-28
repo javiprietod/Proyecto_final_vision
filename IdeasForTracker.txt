@@ -1,0 +1,7 @@
+Fijamos la cámara
+
+Detectamos movimiento en la escena: https://www.youtube.com/watch?v=MkcUgPhOlP8&ab_channel=ProgrammingKnowledge
+
+En ese movimiento filtramos por color: tracker_by_color.py
+
+En cada frame comprobamos con sift si la pelota está dentro del hoyo (hacemos una foto de la pelota dentro del hoyo)
