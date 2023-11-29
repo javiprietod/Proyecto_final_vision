@@ -83,11 +83,6 @@ while True:
     contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     for contour in contours:
-        # Area of contour
-        area = cv2.contourArea(contour)
-        if area < 1000:
-            continue
-        
         # Approximate the contour
         approx_poly = cv2.approxPolyDP(contour, 0.01 * cv2.arcLength(contour, True), True)
         if len(approx_poly) < 10:
@@ -101,7 +96,7 @@ while True:
     cv2.imshow('Motion Detection', frame)
 
     # Perform pattern matching
-    # check_pattern(frame)
+    check_pattern(frame, pattern)
 
     # Break the loop if 'q' is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
