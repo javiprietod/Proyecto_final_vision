@@ -316,7 +316,3 @@ def password(PATTERN):
 
     show_pattern(PATTERN, pattern_functions)
     return
-
-
-if __name__ == "__main__":
-    main()
