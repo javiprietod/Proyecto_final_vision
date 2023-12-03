@@ -39,19 +39,19 @@ def check_ball_in_hole(ball_box, hole_box):
     ball_area = (x1_2 - x1_1) * (y1_2 - y1_1)
 
     # If the common area is greater than 80% of the area of the ball, the ball is inside the hole
-    return common_area >= 0.8 * ball_area
+    return common_area >= 0.5 * ball_area
 
 
 def hsv_to_range(hsv):
     hsv = [hsv[0]*179//360, hsv[1]/100*255, hsv[2]/100*255]
-    return np.array([hsv[0] - 30, hsv[1] - 150, hsv[2] - 150]), np.array([hsv[0] + 30, hsv[1] + 150, hsv[2] + 150])
+    return np.array([hsv[0] - 10, hsv[1] - 100, hsv[2] - 100]), np.array([hsv[0] + 10, hsv[1] + 100, hsv[2] + 100])
 
 
 def process_hole(img, hsv_img):
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Hole filter
-    hole_hsv = [345, 85, 75]
+    hole_hsv = [20, 100, 100]
     low_hole, high_hole = hsv_to_range(hole_hsv)
 
     # Create a mask for the hole color
@@ -92,12 +92,13 @@ def process_hole(img, hsv_img):
 def process_ball(img, hsv_img):
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Yellow filter
-    yellow = [66, 100, 100]
-    yellow_low, yellow_up = hsv_to_range(yellow)
+    # Ball color filter
+    ball_color = [70, 100, 100]
+    # ball_color = [20, 100, 100]
+    ball_low, ball_up = hsv_to_range(ball_color)
 
-    # Create a mask for the yellow color
-    mask = cv2.inRange(hsv_img, yellow_low, yellow_up)
+    # Create a mask for the ball color
+    mask = cv2.inRange(hsv_img, ball_low, ball_up)
 
     # Blur the mask
     mask = cv2.GaussianBlur(mask, (11, 11), 0)

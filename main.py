@@ -3,7 +3,6 @@ import pattern_detection as pd
 import tracker as tr
 import cv2
 from picamera2 import Picamera2
-import random
 from time import perf_counter, sleep
 
 
