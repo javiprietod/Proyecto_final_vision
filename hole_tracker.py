@@ -1,72 +1,80 @@
 import cv2
 import numpy as np
-from skimage.feature import blob_log
-
+from picamera2 import Picamera2
 
 def hsv_to_range(hsv):
-    # blue = [219*179//360, 0.93*255, 0.41*255]
     hsv = [hsv[0] * 179 // 360, hsv[1] / 100 * 255, hsv[2] / 100 * 255]
     return np.array([hsv[0] - 10, hsv[1] - 65, hsv[2] - 65]), np.array(
         [hsv[0] + 10, hsv[1] + 65, hsv[2] + 65]
     )
 
 
-def main():
-    img1 = cv2.imread("images_sift/img4_1.png")
-    img2 = cv2.imread("images_sift/img4_2.png")
-    pattern = cv2.imread("images_sift/pattern4.png")
+def process_hole(img):
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Resize the images to 50% of their original size
-    img1 = cv2.resize(img1, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-    img2 = cv2.resize(img2, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
-    pattern = cv2.resize(pattern, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_AREA)
+    hole_hsv = [345, 85, 75]
+    low_hole, high_hole = hsv_to_range(hole_hsv)
 
-    # img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-    # img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    hsv_img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-    blue_hsv = [218, 52, 77]
-    low_blue, high_blue = hsv_to_range(blue_hsv)
-
-    hsv1 = cv2.cvtColor(img1, cv2.COLOR_BGR2HSV)
-    hsv2 = cv2.cvtColor(img2, cv2.COLOR_BGR2HSV)
-
-    mask1 = cv2.inRange(hsv1, low_blue, high_blue)
-    mask2 = cv2.inRange(hsv2, low_blue, high_blue)
+    mask = cv2.inRange(hsv_img, low_hole, high_hole)
 
     # Blur the mask
-    mask1 = cv2.GaussianBlur(mask1, (11, 11), 0)
-    mask2 = cv2.GaussianBlur(mask2, (11, 11), 0)
+    mask = cv2.GaussianBlur(mask, (11, 11), 0)
 
     # Apply a threshold to the frame
-    _, threshold1 = cv2.threshold(mask1, 50, 255, cv2.THRESH_BINARY)
-    _, threshold2 = cv2.threshold(mask2, 50, 255, cv2.THRESH_BINARY)
+    _, threshold = cv2.threshold(mask, 50, 255, cv2.THRESH_BINARY)
 
-    contours1, _ = cv2.findContours(threshold1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours2, _ = cv2.findContours(threshold2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    contours1 = sorted(contours1, key=cv2.contourArea, reverse=True)
-    contours2 = sorted(contours2, key=cv2.contourArea, reverse=True)
-
-    # Approximate a polygon for each contour
-    contours1 = cv2.approxPolyDP(contours1[0], 0.01 * cv2.arcLength(contours1[0], True), True)
-    contours2 = cv2.approxPolyDP(contours2[0], 0.01 * cv2.arcLength(contours2[0], True), True)
+    if len(contours) == 0:
+        return img, _
     
-    # Draw contours joining the points
-    cv2.drawContours(img1, [contours1], -1, (0, 255, 0), 2)
-    cv2.drawContours(img2, [contours2], -1, (0, 255, 0), 2)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
-    # pattern = cv2.cvtColor(pattern, cv2.COLOR_BGR2GRAY)
+    # Approximate a polygon for the contour
+    poly = cv2.approxPolyDP(contours[0], 0.01 * cv2.arcLength(contours[0], True), True)
+    
+    if len(poly) < 6:
+        return img, _
+    
+    # # Draw contours joining the points
+    # img = cv2.drawContours(img, [contours], -1, (0, 255, 0), 2)
 
-    # img1 = show_matches(img1, pattern, 1)
-    # img2 = show_matches(img2, pattern, 2)
+    # Find bbox
+    x, y, w, h = cv2.boundingRect(contours[0])
+    bbox = [x, y, x + w, y + h]
 
-    # img1 = show_blob_matches(img1, pattern)
-    # img2 = show_blob_matches(img2, pattern)
+    # Draw bbox
+    img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    cv2.imshow("Image1", img1)
-    cv2.imshow("Image2", img2)
+    return img, bbox
 
-    cv2.waitKey(0)
+
+def main():
+    # Open video capture
+    picam = Picamera2()
+    picam.preview_configuration.main.size=(1280, 720)
+    picam.preview_configuration.main.format="RGB888"
+    picam.preview_configuration.align()
+    picam.configure("preview")
+    picam.start()
+
+
+    while True:
+        # Read the next frame
+        frame = picam.capture_array()
+
+        # Process the frame
+        frame, _ = process_hole(frame)
+
+        # Show the frame
+        cv2.imshow("Frame", frame)
+
+        # Break the loop if 'q' is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    
     cv2.destroyAllWindows()
 
 
