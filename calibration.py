@@ -11,7 +11,10 @@ def load_images(filenames):
 
 
 def get_chessboard_points(chessboard_shape, dx, dy):
-    return [[(i%chessboard_shape[0])*dx, (i//chessboard_shape[0])*dy, 0] for i in range(np.prod(chessboard_shape))]
+    return [
+        [(i % chessboard_shape[0]) * dx, (i // chessboard_shape[0]) * dy, 0]
+        for i in range(np.prod(chessboard_shape))
+    ]
 
 
 def main():
@@ -21,9 +24,9 @@ def main():
     # Show images
     plt.figure(figsize=(20, 20))
     for i, img in enumerate(imgs):
-        plt.subplot(1, len(imgs), i+1)
+        plt.subplot(1, len(imgs), i + 1)
         plt.imshow(img)
-        plt.axis('off')
+        plt.axis("off")
     plt.show()
 
     # We will execute findChessboardCorners for each image to find the corners
@@ -38,13 +41,13 @@ def main():
     # Cada una de las imagenes la volvemos a blanco y negro
     imgs_grey = [cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) for img in imgs]
     # For each image and corners we are going to use cornerSubPix
-    cornersRefined = [cv2.cornerSubPix(i, cor[1], dim, (-1, -1), criteria) if cor[0] else [] for i, cor in zip(imgs_grey, corners2)]
+    cornersRefined = [
+        cv2.cornerSubPix(i, cor[1], dim, (-1, -1), criteria) if cor[0] else []
+        for i, cor in zip(imgs_grey, corners2)
+    ]
 
     # OPTIONAL => drawChessboardCorners is a destructive function. so we need to copy corners to avoid data loss
     imgs2 = copy.deepcopy(imgs)
-
-    # We are going to draw the corners if we have found them
-    tmp = [cv2.drawChessboardCorners(img, dim, cor[1], cor[0]) for img, cor in zip(imgs2, corners) if cor[0]]
 
     # Original Image
     plt.figure()
@@ -53,8 +56,6 @@ def main():
     # Image with the corners drawed
     plt.figure()
     plt.imshow(imgs2[1])
-
-    cb_points = get_chessboard_points(dim, 21, 21)
 
     # We are going to retrieve existing corners (cor[0] == True)
     valid_corners = [cor[1] for cor in corners if cor[0]]
@@ -65,19 +66,25 @@ def main():
     real_points = get_chessboard_points(dim, 21, 21)
 
     # We are going to convert our coordinates list in the reference system to numpy array
-    object_points = np.asarray([real_points for i in range(num_valid_images)], dtype=np.float32)
+    object_points = np.asarray(
+        [real_points for i in range(num_valid_images)], dtype=np.float32
+    )
 
     # Convert the corners list to array
     image_points = np.asarray(valid_corners, dtype=np.float32)
 
     # Calibrate
-    rms, intrinsics, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(object_points, image_points, imgs[1].shape[0:2], None, None)
+    rms, intrinsics, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(
+        object_points, image_points, imgs[1].shape[0:2], None, None
+    )
     # Calculate extrinsecs matrix using Rodigues on each rotation vector addid its translation vector
-    extrinsics = list(map(lambda rvec, tvec: np.hstack((cv2.Rodrigues(rvec)[0], tvec)), rvecs, tvecs))
+    extrinsics = list(
+        map(lambda rvec, tvec: np.hstack((cv2.Rodrigues(rvec)[0], tvec)), rvecs, tvecs)
+    )
     # Save the calibration file
-    np.savez('Proyecto_final_vision/calib_params', intrinsic=intrinsics, extrinsic=extrinsics)
+    np.savez("calib_params", intrinsic=intrinsics, extrinsic=extrinsics)
 
     # Lets print some outputs
-    print("Corners standard intrinsics:\n",intrinsics)
+    print("Corners standard intrinsics:\n", intrinsics)
     print("Corners standard dist_coefs:\n", dist_coeffs)
     print("root mean sqaure reprojection error:\n", rms)
