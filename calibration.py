@@ -17,45 +17,25 @@ def get_chessboard_points(chessboard_shape, dx, dy):
     ]
 
 
-def main():
-    filenames = list(sorted(glob.glob("Proyecto_final_vision/imgs/*.jpg")))
+def calibrate():
+    filenames = list(sorted(glob.glob("imgs/*.jpg")))
     imgs = load_images(filenames)
-
-    # Show images
-    plt.figure(figsize=(20, 20))
-    for i, img in enumerate(imgs):
-        plt.subplot(1, len(imgs), i + 1)
-        plt.imshow(img)
-        plt.axis("off")
-    plt.show()
 
     # We will execute findChessboardCorners for each image to find the corners
     dim = (9, 5)
     corners = [cv2.findChessboardCorners(i, dim) for i in imgs]
 
-    # OPTIONAL => cornerSubPix is a destructive function. so we need to copy corners to avoid data loss
-    corners2 = copy.deepcopy(corners)
-
-    # termination criteria (https://docs.opencv.org/3.1.0/dc/dbb/tutorial_py_calibration.html)
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.01)
-    # Cada una de las imagenes la volvemos a blanco y negro
-    imgs_grey = [cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) for img in imgs]
-    # For each image and corners we are going to use cornerSubPix
-    cornersRefined = [
-        cv2.cornerSubPix(i, cor[1], dim, (-1, -1), criteria) if cor[0] else []
-        for i, cor in zip(imgs_grey, corners2)
-    ]
-
     # OPTIONAL => drawChessboardCorners is a destructive function. so we need to copy corners to avoid data loss
     imgs2 = copy.deepcopy(imgs)
 
-    # Original Image
-    plt.figure()
-    plt.imshow(imgs2[-1])
-
-    # Image with the corners drawed
-    plt.figure()
-    plt.imshow(imgs2[1])
+    # Plot each image with the corners in a same figure (only if corners were found)
+    fig = plt.figure(figsize=(10, 10))
+    for i in range(len(imgs)):
+        if corners[i][0]:
+            cv2.drawChessboardCorners(imgs2[i], dim, corners[i][1], corners[i][0])
+        ax = fig.add_subplot(3, 3, i + 1)
+        ax.imshow(imgs2[i])
+    plt.show()
 
     # We are going to retrieve existing corners (cor[0] == True)
     valid_corners = [cor[1] for cor in corners if cor[0]]
