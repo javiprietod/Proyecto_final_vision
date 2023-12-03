@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from picamera2 import Picamera2
 
 
 def check_ball_in_hole(ball_box, hole_box):

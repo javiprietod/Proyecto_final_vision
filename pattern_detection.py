@@ -17,7 +17,7 @@ def isolate_color(friend):
     yellow = [46, 100, 68]
     green = [137, 99, 31]
     red = [357, 96, 54]
-    purple = [267, 55, 46]
+    purple = [280, 45, 45]
 
     blue_mask = get_color_mask(friend, blue)
     yellow_mask = get_color_mask(friend, yellow)
@@ -47,7 +47,7 @@ def get_color_mask(friend, color):
     hsv_image = cv2.cvtColor(friend, cv2.COLOR_RGB2HSV)
     mask = cv2.inRange(hsv_image, lower_hsv, upper_hsv)
     blur = cv2.GaussianBlur(mask, (11, 11), 0)
-    _, threshold = cv2.threshold(blur, 50, 255, cv2.THRESH_BINARY)
+    _, threshold = cv2.threshold(blur, 100, 255, cv2.THRESH_BINARY)
     return threshold
 
 
@@ -64,6 +64,7 @@ def detect_pattern(img, position):
     }
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img, pattern_check = functions[position](img)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     return img, pattern_check
 
 
@@ -82,6 +83,7 @@ def show_pattern(code, functions):
     for elem in code:
         curr_img = patterns[elem]
         curr_img, _ = functions[elem](curr_img)
+        curr_img = cv2.cvtColor(curr_img, cv2.COLOR_RGB2BGR)
         cv2.imshow("Code element 1", curr_img)
         cv2.waitKey(1500)
     cv2.destroyAllWindows()
@@ -171,8 +173,6 @@ def process_pattern_0(img):
         x, y, w, h = bbox
         cv2.rectangle(img, (x, y), (x + w, y + h), bbox_color, 2)
 
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
     return img, pattern_check
 
 
@@ -188,6 +188,11 @@ def process_pattern_1(img):
         for contour in purple_contours:
             x, y, w, h = cv2.boundingRect(contour)
             if w > 100 or h > 100:
+                # Debug
+                print('debug 1')
+                print(len(purple_contours))
+                cv2.drawContours(purple_mask, [contour], 0, (255, 255, 255), 2)
+                cv2.imshow('purple_mask', purple_mask)
                 return img, False
     
     bboxes = []
@@ -196,6 +201,8 @@ def process_pattern_1(img):
     # Detect blue
     blue_contours, _ = cv2.findContours(blue_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(blue_contours) < 2:
+        # Debug
+        print('debug 2')
         return img, False
     blue_contours = sorted(blue_contours, key=cv2.contourArea, reverse=True)
     for i in range(2):
@@ -206,6 +213,8 @@ def process_pattern_1(img):
     # Detect yellow
     yellow_contours, _ = cv2.findContours(yellow_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(yellow_contours) < 1:
+        # Debug
+        print('debug 3')
         return img, False
     yellow_contours = sorted(yellow_contours, key=cv2.contourArea, reverse=True)
     x, y, w, h = cv2.boundingRect(yellow_contours[0])
@@ -215,6 +224,8 @@ def process_pattern_1(img):
     # Detect green
     green_contours, _ = cv2.findContours(green_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(green_contours) < 1:
+        # Debug
+        print('debug 4')
         return img, False
     green_contours = sorted(green_contours, key=cv2.contourArea, reverse=True)
     x, y, w, h = cv2.boundingRect(green_contours[0])
@@ -228,6 +239,8 @@ def process_pattern_1(img):
     # Detect red
     red_contours, _ = cv2.findContours(red_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     if len(red_contours) < 1:
+        # Debug
+        print('debug 5')
         return img, False
     red_contours = sorted(red_contours, key=cv2.contourArea, reverse=True)
     x, y, w, h = cv2.boundingRect(red_contours[0])
@@ -238,6 +251,8 @@ def process_pattern_1(img):
     dist_to_center = get_distance((x_center, y_center), bboxes_centers[-1])
     for center in bboxes_centers[:-1]:
         if get_distance((x_center, y_center), center) < dist_to_center:
+            # Debug
+            print('debug 6')
             return img, False
     
     # Now, the rest of the pattern has 4 elements: 1 blue upperleft, 1 green upperright, 1 yellow bottomleft
@@ -269,8 +284,8 @@ def process_pattern_1(img):
         x, y, w, h = bbox
         cv2.rectangle(img, (x, y), (x + w, y + h), bbox_color, 2)
 
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
+    # Debug
+    print('debug 7')
     return img, pattern_check
 
 
@@ -296,8 +311,6 @@ def process_pattern_2(img):
     if len(poly) < 12:
         return img, False
     cv2.drawContours(img, [poly], 0, (0, 255, 0), 2)
-
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     return img, True
 

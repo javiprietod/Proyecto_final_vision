@@ -4,6 +4,7 @@ import tracker as tr
 import cv2
 from picamera2 import Picamera2
 import random
+from time import perf_counter, sleep
 
 
 def calibrate_camera():
@@ -17,6 +18,7 @@ def calibrate_camera():
 
 def check_pattern():
     return
+
 
 def track(picam):
     print('Searching for ball and hole...')
@@ -65,8 +67,12 @@ def track(picam):
 
 def main():
     # Calibrate the camera
+    print('Calibrating camera...')
     calibrate_camera()
 
+    sleep(2)
+
+    print('Opening video capture...')
     # Open video capture
     picam = Picamera2()
     picam.preview_configuration.main.size=(1280, 720)
@@ -75,12 +81,23 @@ def main():
     picam.configure("preview")
     picam.start()
 
+    print('Checking pattern...')
     # Check if pattern is valid
-    PATTERN = [random.randint(0, 2) for _ in range(4)]
+    PATTERN = [0,1,2,0]
     curr_idx = 0
     print('This is the pattern you need to follow: ')
     pd.password(PATTERN)
+    t0 = perf_counter()
     while curr_idx < 4:
+        while True:
+            frame = picam.capture_array()
+            cv2.imshow('Frame', frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            print('\033[1A\033[2K', end='')
+            # print(f'Next pattern will be checked in {10 - round(perf_counter() - t0, 2)} seconds.')
+            print('Press q when you want to submit an answer.')
+        
         frame = picam.capture_array()
 
         frame, pattern_check = pd.detect_pattern(frame, PATTERN[curr_idx])
@@ -89,11 +106,14 @@ def main():
         
         if pattern_check:
             curr_idx += 1
+            print('Correct pattern, next pattern will be checked in 5 seconds.')
         else:
             curr_idx = 0
             print('Wrong pattern, try again')
+            sleep(1)
             print('This is the pattern you need to follow: ')
             pd.password(PATTERN)
+        t0 = perf_counter()
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -101,7 +121,7 @@ def main():
     cv2.destroyAllWindows()
 
     # Track the ball
-    track(picam)
+    track(picam) 
 
     # Close video capture
     picam.stop()

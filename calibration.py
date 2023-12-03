@@ -19,6 +19,7 @@ def get_chessboard_points(chessboard_shape, dx, dy):
 
 def calibrate():
     filenames = list(sorted(glob.glob("imgs/*.jpg")))
+
     imgs = load_images(filenames)
 
     # We will execute findChessboardCorners for each image to find the corners
@@ -28,14 +29,11 @@ def calibrate():
     # OPTIONAL => drawChessboardCorners is a destructive function. so we need to copy corners to avoid data loss
     imgs2 = copy.deepcopy(imgs)
 
-    # Plot each image with the corners in a same figure (only if corners were found)
-    fig = plt.figure(figsize=(10, 10))
-    for i in range(len(imgs)):
-        if corners[i][0]:
-            cv2.drawChessboardCorners(imgs2[i], dim, corners[i][1], corners[i][0])
-        ax = fig.add_subplot(3, 3, i + 1)
-        ax.imshow(imgs2[i])
-    plt.show()
+    # Save each image with the corners drawn in chessboard_corners folder
+    for i, cor in enumerate(corners):
+        if cor[0]:
+            cv2.drawChessboardCorners(imgs2[i], dim, cor[1], cor[0])
+            cv2.imwrite("chessboard_corners/" + filenames[i].split("/")[-1], imgs2[i])
 
     # We are going to retrieve existing corners (cor[0] == True)
     valid_corners = [cor[1] for cor in corners if cor[0]]
@@ -57,10 +55,12 @@ def calibrate():
     rms, intrinsics, dist_coeffs, rvecs, tvecs = cv2.calibrateCamera(
         object_points, image_points, imgs[1].shape[0:2], None, None
     )
+    
     # Calculate extrinsecs matrix using Rodigues on each rotation vector addid its translation vector
     extrinsics = list(
         map(lambda rvec, tvec: np.hstack((cv2.Rodrigues(rvec)[0], tvec)), rvecs, tvecs)
     )
+
     # Save the calibration file
     np.savez("calib_params", intrinsic=intrinsics, extrinsic=extrinsics)
 
