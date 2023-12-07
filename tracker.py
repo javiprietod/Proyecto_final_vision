@@ -38,7 +38,7 @@ def check_ball_in_hole(ball_box, hole_box):
     # Calculate the area of the ball
     ball_area = (x1_2 - x1_1) * (y1_2 - y1_1)
 
-    # If the common area is greater than 80% of the area of the ball, the ball is inside the hole
+    # If the common area is greater than 50% of the area of the ball, the ball is inside the hole
     return common_area >= 0.5 * ball_area
 
 
