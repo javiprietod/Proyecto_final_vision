@@ -15,10 +15,6 @@ def calibrate_camera():
     return
 
 
-def check_pattern():
-    return
-
-
 def track(picam):
     print('Searching for ball and hole...')
     while True:
