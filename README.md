@@ -40,6 +40,6 @@ Una vez hecho esto, se deberá ejecutar el fichero main.py con Python 3.7 o supe
 python main.py
 ```
 
-Como se ha mencionado anteriormente, se necesitarán imágenes de los patrones para que el programa funcione. Esas imágenes se encuentran en la carpeta ```patterns_images``` y se deberán seguir las intrucciones que aparecen en pantalla para activar el sistema de seguimiento.
+Como se ha mencionado anteriormente, se necesitarán imágenes de los patrones para que el programa funcione. En este caso, los patrones implementados se pueden encontrar en la carpeta ```patterns_images``` y se deberán seguir las intrucciones que aparecen en pantalla para activar el sistema de seguimiento.
 
 
