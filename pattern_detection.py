@@ -25,17 +25,6 @@ def isolate_color(friend):
     red_mask = get_color_mask(friend, red)
     purple_mask = get_color_mask(friend, purple)
 
-    # blue_result = cv2.bitwise_and(friend, friend, mask=blue_mask)
-    # yellow_result = cv2.bitwise_and(friend, friend, mask=yellow_mask)
-    # green_result = cv2.bitwise_and(friend, friend, mask=green_mask)
-    # red_result = cv2.bitwise_and(friend, friend, mask=red_mask)
-    # purple_result = cv2.bitwise_and(friend, friend, mask=purple_mask)
-
-    # result = cv2.bitwise_or(blue_result, yellow_result)
-    # result = cv2.bitwise_or(result, green_result)
-    # result = cv2.bitwise_or(result, red_result)
-    # result = cv2.bitwise_or(result, purple_result)
-
     return blue_mask, yellow_mask, green_mask, red_mask, purple_mask
 
 

@@ -84,6 +84,7 @@ def main():
     pd.password(PATTERN)
     t0 = perf_counter()
     while curr_idx < 4:
+        print(f'Show the pattern {curr_idx} to the camera')
         while True:
             frame = picam.capture_array()
             cv2.imshow('Frame', frame)
